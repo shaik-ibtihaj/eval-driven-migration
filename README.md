@@ -1,6 +1,6 @@
 # Evaluation-Driven Software Migration
 
-This repository provides a minimal foundation for migrating a software system while continuously measuring behavioral compatibility, quality, safety, and performance. The project is intentionally limited to scaffolding at this stage; application logic, evaluation implementations, and infrastructure configuration will be added as the migration evolves.
+This repository provides a benchmark for migrating a legacy Flask order-management backend to FastAPI while continuously measuring behavioral compatibility, quality, safety, and performance.
 
 ## Repository layout
 
@@ -12,10 +12,10 @@ This repository provides a minimal foundation for migrating a software system wh
 - `evidence/` stores traces, counterexamples, evaluation run artifacts, and reports produced during migration work.
 - `infrastructure/` contains supporting Docker and database assets needed to run the applications and evaluation environment.
 
-## Initial commands
+## Stage 2 commands
 
-Run `make help` to list the placeholder workflow targets. The `test`, `evaluate`, and `clean` targets are intentionally non-operative until their corresponding tooling is introduced.
+Copy `.env.example` to `.env` if local overrides are needed, then use `make start` to build and start PostgreSQL and the legacy API. Run `make reset` to rebuild deterministic database state, `make snapshot` to print it, `make test` for the PostgreSQL-backed suite, and `make stop` to stop services. `make setup`, `make test-unit`, `make lint`, and `make format-check` run the corresponding local `uv` workflows.
 
 ## Current status
 
-Only the repository structure and minimal configuration placeholders are present. No application or migration logic has been implemented.
+Stage 1's authoritative contract is in [`docs/benchmark-specification.md`](docs/benchmark-specification.md). Stage 2 adds only the runnable Flask/PostgreSQL foundation, deterministic seed and payment mock, `/health`, and focused tests. The five business endpoints, FastAPI migration, agents, and evaluators have not been started.

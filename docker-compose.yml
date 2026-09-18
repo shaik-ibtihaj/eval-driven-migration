@@ -1,1 +1,43 @@
-services: {}
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-benchmark}
+      POSTGRES_USER: ${POSTGRES_USER:-benchmark}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-benchmark}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  legacy-api:
+    build:
+      context: .
+      dockerfile: apps/legacy/Dockerfile
+    environment:
+      APP_ENV: ${APP_ENV:-development}
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://benchmark:benchmark@db:5432/benchmark}
+      SECRET_KEY: ${SECRET_KEY:-development-only-secret}
+      PAYMENT_PROVIDER_MODE: mock
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${LEGACY_API_PORT:-8000}:8000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')",
+        ]
+      interval: 3s
+      timeout: 3s
+      retries: 15
+
+volumes:
+  postgres-data:
